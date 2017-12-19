@@ -1,0 +1,25 @@
+{
+	"translations": {
+		"de": {
+			"TP Link HS type": "TP Link HS Typ",
+			"model": "Modell",
+			"HS100": "HS100",
+			"HS110": "HS110",
+			"TP Link HS device ip address": "TP Link HS Geräte IP Adresse",
+			"IP adress": "IP Adresse",
+			"TP Link HS device": "TP Link HS Gerät",
+			"TP Link HS Power On": "TP Link HS Power On",
+			"On": "Ein",
+			"TP Link HS Power Off": "TP Link HS Power Off",
+			"Off": "Aus",
+            "TP Link HS device state update interval": "TP Link HS Geräte Status Aktualisierungs Intervall",
+            "seconds": "Sekunden",
+            "TP Link HS device system info update interval": "TP Link HS Geräte System Info Aktualisierungs Interval",
+			"IP Address is not valid.": "IP Adresse ist nicht gültig.",
+			"configuration valid": "Konfiguration gültig",
+			"TP Link Device is inactive": "TP Link Gerät ist inaktiv",
+			"creating instance": "Die Instanz wird erstellt",
+			"instance created.": "Instanz erstellt"
+		}
+	}
+}

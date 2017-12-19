@@ -1,0 +1,29 @@
+{
+    "elements":
+            [
+				{ "type": "Label", "label": "TP Link HS device ip address"},
+				{
+                    "name": "Name",
+                    "type": "ValidationTextBox",
+                    "caption": "Name"
+                }
+            ],
+    "status":
+            [
+                {
+                    "code": 101,
+                    "icon": "inactive",
+                    "caption": "creating instance"
+                },
+				{
+                    "code": 102,
+                    "icon": "active",
+                    "caption": "configuration valid"
+                },
+                {
+                    "code": 104,
+                    "icon": "inactive",
+                    "caption": "TP Link Device is inactive"
+                }
+            ]
+}

@@ -1,0 +1,13 @@
+{
+	"id": "{60204C56-1ED8-9C2A-9C80-F4F6483DD1B1}",
+	"author": "Fonzo",
+	"name": "TPLinkHS110",
+	"url": "http://www.tp-link.de/products/details/cat-5258_HS110.html",
+	"compatibility": {
+		"version": "4.2",
+		"date": 1491343200
+	},
+	"version": "0.1",
+	"build": 0,
+	"date": 0
+}

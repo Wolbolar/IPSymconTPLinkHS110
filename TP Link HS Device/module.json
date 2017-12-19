@@ -1,0 +1,11 @@
+{
+	"id": "{F270009C-576A-E818-816F-67CF636E285A}",
+	"name": "TPLinkHS110",
+	"type": 3,
+	"vendor": "TP Link",
+	"aliases": ["TP Link HS 110"],
+	"parentRequirements": [],
+	"childRequirements": [],
+	"implemented": [],
+	"prefix": "TPLHS"
+}
