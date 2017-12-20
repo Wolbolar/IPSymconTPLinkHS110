@@ -8,9 +8,25 @@
 			//Never delete this line!
 			parent::Create();
 			$this->RegisterPropertyString("Host", "");
-            $this->RegisterPropertyInteger("model", 1);
+            $this->RegisterPropertyInteger("modelselection", 1);
             $this->RegisterPropertyInteger("stateinterval", 0);
             $this->RegisterPropertyInteger("systeminfointerval", 0);
+            $this->RegisterPropertyBoolean("extendedinfo", false);
+            $this->RegisterPropertyString("softwareversion", "");
+            $this->RegisterPropertyFloat("hardwareversion", 0);
+            $this->RegisterPropertyString("type", "");
+            $this->RegisterPropertyString("model", "");
+            $this->RegisterPropertyString("mac", "");
+            $this->RegisterPropertyString("deviceid", "");
+            $this->RegisterPropertyString("hardwareid", "");
+            $this->RegisterPropertyString("firmwareid", "");
+            $this->RegisterPropertyString("oemid", "");
+            $this->RegisterPropertyString("alias", "");
+            $this->RegisterPropertyString("devicename", "");
+            $this->RegisterPropertyInteger("rssi", 0);
+            $this->RegisterPropertyBoolean("ledoff", false);
+            $this->RegisterPropertyFloat("latitude", 0);
+            $this->RegisterPropertyFloat("longitude", 0);
             $this->RegisterTimer('StateUpdate', 0, 'TPLHS_StateTimer('.$this->InstanceID.');');
             $this->RegisterTimer('SystemInfoUpdate', 0, 'TPLHS_SystemInfoTimer('.$this->InstanceID.');');
 		}
@@ -21,16 +37,16 @@
 			parent::ApplyChanges();
             $this->RegisterVariableBoolean("State", "Status", "~Switch", 1);
             $this->EnableAction("State");
-			$model = $this->ReadPropertyInteger("model");
+			$model = $this->ReadPropertyInteger("modelselection");
 			if($model == 2)
             {
                 $this->RegisterVariableFloat("Voltage", "Spannung", "~Volt.230", 2);
-                $this->EnableAction("Voltage");
+                //$this->EnableAction("Voltage");
                 $this->RegisterVariableFloat("Power", "Leistung", "~Power", 3);
                 // ~Electricity
-                $this->EnableAction("Power");
-                $this->RegisterVariableFloat("Current", "Aktuell", "~Watt.3680", 4);
-                $this->EnableAction("Current");
+                //$this->EnableAction("Power");
+                $this->RegisterVariableFloat("Current", "Aktuell", "~Ampere", 4);
+                //$this->EnableAction("Current");
             }
 			$this->ValidateConfiguration();	
 		}
@@ -72,6 +88,11 @@
                 $hostcheck = false;
                 $this->SetStatus(203); //IP Adresse oder Host ist ungültig
             }
+            $extendedinfo = $this->ReadPropertyBoolean("extendedinfo");
+            if($extendedinfo)
+            {
+
+            }
             $this->SetStateInterval($hostcheck);
             $this->SetSystemInfoInterval($hostcheck);
 		}
@@ -90,7 +111,7 @@
         {
             if($hostcheck)
             {
-                $devicetype = $this->ReadPropertyInteger("model");
+                $devicetype = $this->ReadPropertyInteger("modelselection");
                 $stateinterval = $this->ReadPropertyInteger("stateinterval");
                 $interval = $stateinterval * 1000;
                 if($devicetype == 2)
@@ -108,7 +129,7 @@
         {
             if($hostcheck)
             {
-                $devicetype = $this->ReadPropertyInteger("model");
+                $devicetype = $this->ReadPropertyInteger("modelselection");
                 $infointerval = $this->ReadPropertyInteger("systeminfointerval");
                 $interval = $infointerval * 60 * 1000;
                 if($devicetype == 2)
@@ -227,22 +248,63 @@
         // Get System Info (Software & Hardware Versions, MAC, deviceID, hwID etc.)
         public function GetSystemInfo()
         {
-            #########################################################################################################################################
-            # Command to Send: {"system":{"get_sysinfo":{"err_code":0,"sw_ver":"1.1.4 Build 170417
-            # Expexted answer: Rel.145118","hw_ver":"1.0","type":"IOT.SMARTPLUGSWITCH","model":"HS110(EU)","mac":"70:4F:57:1B:DD:C1","deviceId":"8006E91F9E48110F07356B2A68FBF29018EC5159","hwId":"45E29DA8382494D2E82688B52A0B2EB5","fwId":"851E8C7225C3220531D5A3AFDACD9098","oemId":"3D341ECE302C0642C99E31CE2430544B","alias":"Egon","dev_name":"Wi-Fi Smart Plug With Energy Monitoring","icon_hash":"","relay_state":1,"on_time":22954,"active_mode":"schedule","feature":"TIM:ENE","updating":0,"rssi":-45,"led_off":0,"latitude":48.123456,"longitude":11.123456}}}
-
             $command = '{"system":{"get_sysinfo":{}}}';
             $result = $this->SendToTPLink($command);
-            /*
-            if($debug)
+            $systeminfo = $result->system->get_sysinfo;
+            $err_code = intval($systeminfo->err_code);
+            $sw_ver = $systeminfo->sw_ver;
+            $hw_ver = floatval($systeminfo->hw_ver);
+            $type = $systeminfo->type;
+            $model = $systeminfo->model;
+            $mac = $systeminfo->mac;
+            $deviceId = $systeminfo->deviceId;
+            $hwId = $systeminfo->hwId;
+            $fwId = $systeminfo->fwId;
+            $oemId = $systeminfo->oemId;
+            $alias = $systeminfo->alias;
+            $dev_name = $systeminfo->dev_name;
+            $icon_hash = $systeminfo->icon_hash;
+            $relay_state = boolval($systeminfo->relay_state);
+            $on_time = intval($systeminfo->on_time);
+            $active_mode = $systeminfo->active_mode;
+            $feature = $systeminfo->feature;
+            $rssi = intval($systeminfo->rssi);
+            $led_off = boolval($systeminfo->led_off);
+            $latitude = floatval($systeminfo->latitude);
+            $longitude = floatval($systeminfo->longitude);
+
+            SetValueBoolean($this->GetIDForIdent("State"), $relay_state);
+
+
+            $extendedinfo = $this->ReadPropertyBoolean("extendedinfo");
+            if($extendedinfo)
             {
-                echo " --> Message received successfully - Lenght: " . strlen($buf) . " - decrypt:\n" . decrypt($buf) . "\n";
-                print_r((array) json_decode(decrypt($buf)));
-                $result->system->get_sysinfo->model . " - ". $result->system->get_sysinfo->alias . " - " . $result->system->get_sysinfo->relay_state . " (1 = on / 0 = 0ff) - Values: ";
+                SetValueString($this->GetIDForIdent("alias"), $alias);
             }
-            */
-            SetValueBoolean($this->GetIDForIdent("State"), boolval($result->system->get_sysinfo->relay_state));
-            return $result;
+            $systeminfo = array("state" => $relay_state, "errorcode" => $err_code, "softwareversion" => $sw_ver, "hardwareversion" => $hw_ver, "type" => $type, "model" => $model, "mac" => $mac, "deviceid" => $deviceId, "hardwareid" => $hwId,
+                "firmwareid" => $fwId, "oemid" => $oemId, "alias" => $alias, "devicename" => $dev_name, "iconhash" => $icon_hash, "ontime" => $on_time, "active_mode" => $active_mode, "feature" => $feature, "rssi" => $rssi, "ledoff" => $led_off, "latitude" => $latitude, "longitude" => $longitude);
+            return $systeminfo;
+        }
+
+        public function WriteSystemInfo()
+        {
+            $systeminfo = $this->GetSystemInfo();
+            IPS_SetProperty($this->InstanceID, "softwareversion", $systeminfo["softwareversion"]);
+            IPS_SetProperty($this->InstanceID, "hardwareversion", $systeminfo["hardwareversion"]);
+            IPS_SetProperty($this->InstanceID, "type", $systeminfo["type"]);
+            IPS_SetProperty($this->InstanceID, "model", $systeminfo["model"]);
+            IPS_SetProperty($this->InstanceID, "mac", $systeminfo["mac"]);
+            IPS_SetProperty($this->InstanceID, "deviceid", $systeminfo["deviceid"]);
+            IPS_SetProperty($this->InstanceID, "hardwareid", $systeminfo["hardwareid"]);
+            IPS_SetProperty($this->InstanceID, "firmwareid", $systeminfo["firmwareid"]);
+            IPS_SetProperty($this->InstanceID, "oemid", $systeminfo["oemid"]);
+            IPS_SetProperty($this->InstanceID, "alias", $systeminfo["alias"]);
+            IPS_SetProperty($this->InstanceID, "devicename", $systeminfo["devicename"]);
+            IPS_SetProperty($this->InstanceID, "rssi", $systeminfo["rssi"]);
+            IPS_SetProperty($this->InstanceID, "ledoff", $systeminfo["ledoff"]);
+            IPS_SetProperty($this->InstanceID, "latitude", $systeminfo["latitude"]);
+            IPS_SetProperty($this->InstanceID, "longitude", $systeminfo["longitude"]);
+            IPS_ApplyChanges($this->InstanceID);
         }
 
         // Reboot
@@ -491,20 +553,8 @@
         // Get Realtime Current and Voltage Reading
         public function GetRealtimeCurrent()
         {
-            #########################################################################################################################################
-            # Command to Send: '{"emeter":{"get_realtime":{}}}'
-            # Expexted answer: {"emeter":{"get_realtime":{"current":0.151818,"voltage":231.747099,"power":20.172881,"total":2.597000,"err_code":0}}}
-
             $command = '{"emeter":{"get_realtime":{}}}';
             $result = $this->SendToTPLink($command);
-            /*
-             if($debug)
-             {
-                    echo " --> Message received successfully - Lenght: " . strlen($buf) . " - decrypt:\n" . decrypt($buf) . "\n";;
-                    print_r((array) json_decode(decrypt($buf)));
-                    echo $result->emeter->get_realtime->voltage . "V / " . $result->emeter->get_realtime->current . "A / " . $result->emeter->get_realtime->power . "W";
-                }
-             */
             SetValueFloat($this->GetIDForIdent("Voltage"), floatval($result->emeter->get_realtime->voltage));
             SetValueFloat($this->GetIDForIdent("Current"), floatval($result->emeter->get_realtime->current));
             SetValueFloat($this->GetIDForIdent("Power"), floatval($result->emeter->get_realtime->power));
@@ -847,7 +897,7 @@
             $form = '"elements":
             [
                 { "type": "Label", "label": "TP Link HS type"},
-                { "type": "Select", "name": "model", "caption": "model",
+                { "type": "Select", "name": "modelselection", "caption": "model",
 					"options": [
 						{ "label": "HS100", "value": 1 },
 						{ "label": "HS110", "value": 2 }
@@ -861,13 +911,37 @@
                 },
                 { "type": "Label", "label": "TP Link HS device state update interval"},
                 { "type": "IntervalBox", "name": "stateinterval", "caption": "seconds" },';
-            $model = $this->ReadPropertyInteger("model");
+            $model = $this->ReadPropertyInteger("modelselection");
             if($model == 2)
             {
                 $form .= '{ "type": "Label", "label": "TP Link HS device system info update interval"},
                 { "type": "IntervalBox", "name": "systeminfointerval", "caption": "seconds" },';
             }
-
+            $softwareversion = $this->ReadPropertyString("softwareversion");
+            if($softwareversion == "")
+            {
+                $form .='{ "type": "Label", "label": "TP Link HS get system information" },
+                { "type": "Button", "label": "Get system info", "onClick": "TPLHS_WriteSystemInfo($id);" },';
+            }
+            else
+            {
+                $form .= '{ "type": "Label", "label": "Data is from the TP Link HS device do not edit only for information, change settings in the kasa app" },';
+                $form .= '{"name": "softwareversion", "type": "ValidationTextBox", "caption": "software version"},';
+                $form .= '{"name": "hardwareversion", "type": "ValidationTextBox", "caption": "hardware version"},';
+                $form .= '{"name": "type", "type": "ValidationTextBox", "caption": "type"},';
+                $form .= '{"name": "model", "type": "ValidationTextBox", "caption": "model"},';
+                $form .= '{"name": "mac", "type": "ValidationTextBox", "caption": "mac"},';
+                $form .= '{"name": "deviceid", "type": "ValidationTextBox", "caption": "device id"},';
+                $form .= '{"name": "hardwareid", "type": "ValidationTextBox", "caption": "hardware id"},';
+                $form .= '{"name": "firmwareid", "type": "ValidationTextBox", "caption": "firmware id"},';
+                $form .= '{"name": "oemid", "type": "ValidationTextBox", "caption": "oem id"},';
+                $form .= '{"name": "alias", "type": "ValidationTextBox", "caption": "alias"},';
+                $form .= '{"name": "devicename", "type": "ValidationTextBox", "caption": "device name"},';
+                $form .= '{"name": "rssi", "type": "ValidationTextBox", "caption": "rssi"},';
+                $form .= '{"name": "ledoff", "type": "ValidationTextBox", "caption": "led state"},';
+                $form .= '{"name": "latitude", "type": "ValidationTextBox", "caption": "latitude"},';
+                $form .= '{"name": "longitude", "type": "ValidationTextBox", "caption": "longitude"},';
+            }
             return $form;
         }
 
@@ -876,6 +950,8 @@
             $form = '"actions":
 			[
 				{ "type": "Label", "label": "TP Link HS device" },
+				{ "type": "Label", "label": "TP Link HS get system information" },
+				{ "type": "Button", "label": "Get system info", "onClick": "TPLHS_WriteSystemInfo($id);" },
 				{ "type": "Label", "label": "TP Link HS Power On" },
 				{ "type": "Button", "label": "On", "onClick": "TPLHS_PowerOn($id);" },
 				{ "type": "Label", "label": "TP Link HS Power Off" },

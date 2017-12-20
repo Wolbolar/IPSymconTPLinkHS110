@@ -151,7 +151,9 @@ Parameter _$InstanceID_ __*ObjektID*__ der TP Link HS Geräte Instanz für die e
 
 GUID: `{F270009C-576A-E818-816F-67CF636E285A}` 
 
+### b. Quellen
 
+[TP110-Addon von *nisbo*](https://github.com/Nisbo/TP110-Addon "TP110-Addon von nisbo")
 
 
 
