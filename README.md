@@ -16,7 +16,7 @@ Modul für IP-Symcon ab Version 4.2 ermöglicht die Kommunikation mit einer TP L
 
 ## 1. Funktionsumfang
 
-Das Modul kann aus IP-Symcon Befehle an eine TP Link HS 100 bzw. TP Link HS 110 verschicken und den Status der Steckdose in Ip-Symcon in Variablen darstellen.
+Das Modul kann aus IP-Symcon Befehle an eine TP Link HS 100 bzw. TP Link HS 110 verschicken und den Status der Steckdose in IP-Symcon in Variablen darstellen.
 
 ## 2. Voraussetzungen
 
@@ -48,7 +48,7 @@ Anschließend erscheint ein Eintrag für das Modul in der Liste der Instanz _Mod
 
 #### 1. Anlegen des TP Link HS
 
-In IP-Symcon unter I/O Instanzen wechseln. Hier eine neue Instanz mit _Rechter Mausklick->Objekt hinzufügen->Instanz hinzufügen_ oder _CTRL+1_ erzeugen und als Gerät __*TP LINK HS 110*__ wählen.
+In IP-Symcon in eine Kategorie wechseln unter der die Instanz angelegt werden soll. Hier eine neue Instanz mit _Rechter Mausklick->Objekt hinzufügen->Instanz hinzufügen_ oder _CTRL+1_ erzeugen und als Gerät __*TP LINK HS 110*__ wählen.
 
 ![AddInstance](docs/Instance.png?raw=true "Add Instance")
 
@@ -60,6 +60,8 @@ Im Konfiguartionsformular wird nun die IP Adresse des Geräts eingetragen und de
 
 Es wird ein Aktualisierungsintervall eingestellt und dann mit _Übernehmen_ bestätigt.
 
+Im Anschluss kann auf _System Infomationen abrufen_ gedrückt werden, es werden dann erweiterte Systeminfomation des Geräts angerufen die noch erneuten Öffnen der Instanz im Formular sichtbar sind.
+
 
 ##### TP Link HS
 
@@ -67,9 +69,8 @@ Es werden automatisch passend zum Geräte Typ die Variablen mit angelegt.
 
 Objektbaum:
 
+![ModulesCommands](docs/objecttree.png?raw=true "Commands")
 
-
-Webfront:
 
 Ausgelesen werden aus dem TP LINK HS 100
 
@@ -92,9 +93,7 @@ Webfront:
 
 ![ModulesCommands](docs/wfview.png?raw=true "Commands")
 
-Objektbaum:
 
-![ModulesCommands](docs/objecttree.png?raw=true "Commands")
 
 ## 4. Funktionsreferenz
 
@@ -154,8 +153,3 @@ GUID: `{F270009C-576A-E818-816F-67CF636E285A}`
 ### b. Quellen
 
 [TP110-Addon von *nisbo*](https://github.com/Nisbo/TP110-Addon "TP110-Addon von nisbo")
-
-
-
-
-
