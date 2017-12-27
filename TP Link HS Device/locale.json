@@ -31,6 +31,7 @@
 			"led state": "LED Status",
 			"latitude": "Breitengrad",
 			"longitude": "Längengrad",
+			"Reset Work": "Arbeit zurücksetzten",
 			"Get system info": "System Infomationen abrufen",
 			"IP Address is not valid.": "IP Adresse ist nicht gültig.",
 			"configuration valid": "Konfiguration gültig",

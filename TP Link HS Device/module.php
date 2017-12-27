@@ -41,12 +41,9 @@
 			if($model == 2)
             {
                 $this->RegisterVariableFloat("Voltage", "Spannung", "~Volt.230", 2);
-                //$this->EnableAction("Voltage");
-                $this->RegisterVariableFloat("Power", "Leistung", "~Power", 3);
-                // ~Electricity
-                //$this->EnableAction("Power");
-                $this->RegisterVariableFloat("Current", "Aktuell", "~Ampere", 4);
-                //$this->EnableAction("Current");
+                $this->RegisterVariableFloat("Power", "Leistung", "~Watt.14490", 3);
+                $this->RegisterVariableFloat("Current", "Strom", "~Milliampere.HM", 4);
+                $this->RegisterVariableFloat("Work", "Arbeit", "~Electricity.HM", 5);
             }
 			$this->ValidateConfiguration();	
 		}
@@ -107,6 +104,12 @@
             $this->GetRealtimeCurrent();
         }
 
+        public function ResetWork()
+        {
+            $result = SetValueFloat($this->GetIDForIdent("Work"), 0.0);
+            return $result;
+        }
+
         protected function SetStateInterval($hostcheck)
         {
             if($hostcheck)
@@ -131,7 +134,7 @@
             {
                 $devicetype = $this->ReadPropertyInteger("modelselection");
                 $infointerval = $this->ReadPropertyInteger("systeminfointerval");
-                $interval = $infointerval * 60 * 1000;
+                $interval = $infointerval * 1000;
                 if($devicetype == 2)
                 {
                     $this->SetTimerInterval("SystemInfoUpdate", $interval);
@@ -556,9 +559,14 @@
             $command = '{"emeter":{"get_realtime":{}}}';
             $result = $this->SendToTPLink($command);
             SetValueFloat($this->GetIDForIdent("Voltage"), floatval($result->emeter->get_realtime->voltage));
-            SetValueFloat($this->GetIDForIdent("Current"), floatval($result->emeter->get_realtime->current));
-            SetValueFloat($this->GetIDForIdent("Power"), floatval($result->emeter->get_realtime->power));
-            return array("voltage" => floatval($result->emeter->get_realtime->voltage), "current" => floatval($result->emeter->get_realtime->current), "power" => floatval($result->emeter->get_realtime->power));
+            SetValueFloat($this->GetIDForIdent("Current"), floatval($result->emeter->get_realtime->current*1000.0));
+            $power = floatval($result->emeter->get_realtime->power);
+            SetValueFloat($this->GetIDForIdent("Power"), $power);
+            $previous_work = GetValue($this->GetIDForIdent("Work"));
+            $timefactor = floatval($this->ReadPropertyInteger("systeminfointerval")/3600.0);
+            $work = $previous_work + ($power * $timefactor);
+            SetValueFloat($this->GetIDForIdent("Work"), $work);
+            return array("voltage" => floatval($result->emeter->get_realtime->voltage), "current" => floatval($result->emeter->get_realtime->current), "power" => floatval($result->emeter->get_realtime->power), "work" => $work);
         }
 
         // Get EMeter VGain and IGain Settings
@@ -955,7 +963,10 @@
 				{ "type": "Label", "label": "TP Link HS Power On" },
 				{ "type": "Button", "label": "On", "onClick": "TPLHS_PowerOn($id);" },
 				{ "type": "Label", "label": "TP Link HS Power Off" },
-				{ "type": "Button", "label": "Off", "onClick": "TPLHS_PowerOff($id);" }
+				{ "type": "Button", "label": "Off", "onClick": "TPLHS_PowerOff($id);" },
+				{ "type": "Label", "label": "Reset Work" },
+				{ "type": "Button", "label": "Reset Work", "onClick": "TPLHS_ResetWork($id);" }
+			],\';
 			],';
             return  $form;
         }
