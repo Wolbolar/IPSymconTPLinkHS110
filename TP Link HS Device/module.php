@@ -966,7 +966,6 @@
 				{ "type": "Button", "label": "Off", "onClick": "TPLHS_PowerOff($id);" },
 				{ "type": "Label", "label": "Reset Work" },
 				{ "type": "Button", "label": "Reset Work", "onClick": "TPLHS_ResetWork($id);" }
-			],\';
 			],';
             return  $form;
         }
