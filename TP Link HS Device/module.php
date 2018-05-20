@@ -280,8 +280,23 @@
             $feature = $systeminfo->feature;
             $rssi = intval($systeminfo->rssi);
             $led_off = boolval($systeminfo->led_off);
-            $latitude = floatval($systeminfo->latitude);
-            $longitude = floatval($systeminfo->longitude);
+            if(isset($systeminfo->latitude))
+			{
+				$latitude = floatval($systeminfo->latitude);
+			}
+			else
+			{
+				$latitude = 0;
+			}
+			if(isset($systeminfo->longitude))
+			{
+				$longitude = floatval($systeminfo->longitude);
+			}
+			else{
+				$longitude = 0;
+			}
+
+
 
             SetValueBoolean($this->GetIDForIdent("State"), $relay_state);
 
