@@ -41,16 +41,12 @@
 			$model = $this->ReadPropertyInteger("modelselection");
 			if($model == 2)
             {
-				$this->RegisterProfile('TPLinkHS.Volt.230', 'Electricity', '', " V", 207, 253, 0, 1, 2);
-				$this->RegisterProfile('TPLinkHS.Watt.14490', 'Electricity', '', " W", 0, 14490, 0, 1, 2);
 				$this->RegisterProfile('TPLinkHS.Milliampere', '', '', " mA", 0, 0, 0, 0, 2);
-				$this->RegisterProfile('TPLinkHS.Electricity', '', '', " Wh", 0, 0, 0, 2, 2);
 
-
-                $this->RegisterVariableFloat("Voltage", "Spannung", "TPLinkHS.Volt.230", 2);
-                $this->RegisterVariableFloat("Power", "Leistung", "TPLinkHS.Watt.14490", 3);
+                $this->RegisterVariableFloat("Voltage", "Spannung", "Volt.230", 2);
+                $this->RegisterVariableFloat("Power", "Leistung", "Watt.14490", 3);
                 $this->RegisterVariableFloat("Current", "Strom", "TPLinkHS.Milliampere", 4);
-                $this->RegisterVariableFloat("Work", "Arbeit", "TPLinkHS.Electricity", 5);
+                $this->RegisterVariableFloat("Work", "Arbeit", "Electricity", 5);
             }
 			$this->ValidateConfiguration();	
 		}
@@ -581,12 +577,16 @@
             $command = '{"emeter":{"get_realtime":{}}}';
             $result = $this->SendToTPLink($command);
             SetValueFloat($this->GetIDForIdent("Voltage"), floatval($result->emeter->get_realtime->voltage));
+			$this->SendDebug("TP Link:","Voltage: ".floatval($result->emeter->get_realtime->voltage),0);
             SetValueFloat($this->GetIDForIdent("Current"), floatval($result->emeter->get_realtime->current*1000.0));
+			$this->SendDebug("TP Link:","Current: ".floatval($result->emeter->get_realtime->current*1000.0),0);
             $power = floatval($result->emeter->get_realtime->power);
+			$this->SendDebug("TP Link:","Power: ".$power,0);
             SetValueFloat($this->GetIDForIdent("Power"), $power);
             $previous_work = GetValue($this->GetIDForIdent("Work"));
             $timefactor = floatval($this->ReadPropertyInteger("systeminfointerval")/3600.0);
             $work = $previous_work + ($power * $timefactor);
+			$this->SendDebug("TP Link:","Work: ".$work,0);
             SetValueFloat($this->GetIDForIdent("Work"), $work);
             return array("voltage" => floatval($result->emeter->get_realtime->voltage), "current" => floatval($result->emeter->get_realtime->current), "power" => floatval($result->emeter->get_realtime->power), "work" => $work);
         }
