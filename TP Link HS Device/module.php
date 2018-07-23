@@ -191,6 +191,7 @@ class TPLinkHS110 extends IPSModule
 
 	protected function sendToSocket($messageToSend, $sock)
 	{
+		$this->SendDebug("TP Link Socket:", "Send Command: ". $messageToSend, 0);
 		$message = $this->encrypt($messageToSend);
 
 		//Send the message to the server
