@@ -224,6 +224,7 @@ class TPLinkHS110 extends IPSModule
 		$buf = $this->getResultFromSocket($sock);
 		$result = json_decode($this->decrypt($buf));
 		socket_close($sock);
+		$this->SendDebug("TP Link Socket:", "Result: ". json_encode($result), 0);
 		return $result;
 	}
 
