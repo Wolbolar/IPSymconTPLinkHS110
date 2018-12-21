@@ -550,19 +550,38 @@ class TPLinkHS110 extends IPSModule
 	{
 		$command = '{"emeter":{"get_realtime":{}}}';
 		$result = $this->SendToTPLink($command);
-		SetValueFloat($this->GetIDForIdent("Voltage"), floatval($result->emeter->get_realtime->voltage));
-		$this->SendDebug("TP Link:", "Voltage: " . floatval($result->emeter->get_realtime->voltage), 0);
-		SetValueFloat($this->GetIDForIdent("Current"), floatval($result->emeter->get_realtime->current * 1000.0));
-		$this->SendDebug("TP Link:", "Current: " . floatval($result->emeter->get_realtime->current * 1000.0), 0);
-		$power = floatval($result->emeter->get_realtime->power);
-		$this->SendDebug("TP Link:", "Power: " . $power, 0);
-		SetValueFloat($this->GetIDForIdent("Power"), $power);
-		$previous_work = GetValue($this->GetIDForIdent("Work"));
-		$timefactor = floatval($this->ReadPropertyInteger("systeminfointerval") / 3600.0);
-		$work = $previous_work + ($power * $timefactor);
-		$this->SendDebug("TP Link:", "Work: " . $work, 0);
-		SetValueFloat($this->GetIDForIdent("Work"), $work);
-		return array("voltage" => floatval($result->emeter->get_realtime->voltage), "current" => floatval($result->emeter->get_realtime->current), "power" => floatval($result->emeter->get_realtime->power), "work" => $work);
+		$hardwareversion = $this->ReadPropertyFloat("hardwareversion");
+		if($hardwareversion == 1)
+		{
+			SetValueFloat($this->GetIDForIdent("Voltage"), floatval($result->emeter->get_realtime->voltage));
+			$this->SendDebug("TP Link:", "Voltage: " . floatval($result->emeter->get_realtime->voltage), 0);
+			SetValueFloat($this->GetIDForIdent("Current"), floatval($result->emeter->get_realtime->current * 1000.0));
+			$this->SendDebug("TP Link:", "Current: " . floatval($result->emeter->get_realtime->current * 1000.0), 0);
+			$power = floatval($result->emeter->get_realtime->power);
+			$this->SendDebug("TP Link:", "Power: " . $power, 0);
+			SetValueFloat($this->GetIDForIdent("Power"), $power);
+			$previous_work = GetValue($this->GetIDForIdent("Work"));
+			$timefactor = floatval($this->ReadPropertyInteger("systeminfointerval") / 3600.0);
+			$work = $previous_work + ($power * $timefactor);
+			$this->SendDebug("TP Link:", "Work: " . $work, 0);
+			SetValueFloat($this->GetIDForIdent("Work"), $work);
+			return array("voltage" => floatval($result->emeter->get_realtime->voltage), "current" => floatval($result->emeter->get_realtime->current), "power" => floatval($result->emeter->get_realtime->power), "work" => $work);
+		}
+		else{
+			SetValueFloat($this->GetIDForIdent("Voltage"), floatval($result->emeter->get_realtime->voltage_mv));
+			$this->SendDebug("TP Link:", "Voltage: " . floatval($result->emeter->get_realtime->voltage_mv), 0);
+			SetValueFloat($this->GetIDForIdent("Current"), floatval($result->emeter->get_realtime->current_ma * 1000.0));
+			$this->SendDebug("TP Link:", "Current: " . floatval($result->emeter->get_realtime->current_ma * 1000.0), 0);
+			$power = floatval($result->emeter->get_realtime->power_mw);
+			$this->SendDebug("TP Link:", "Power: " . $power, 0);
+			SetValueFloat($this->GetIDForIdent("Power"), $power);
+			$previous_work = GetValue($this->GetIDForIdent("Work"));
+			$timefactor = floatval($this->ReadPropertyInteger("systeminfointerval") / 3600.0);
+			$work = $previous_work + ($power * $timefactor);
+			$this->SendDebug("TP Link:", "Work: " . $work, 0);
+			SetValueFloat($this->GetIDForIdent("Work"), $work);
+			return array("voltage" => floatval($result->emeter->get_realtime->voltage_mv), "current" => floatval($result->emeter->get_realtime->current_ma), "power" => floatval($result->emeter->get_realtime->power_mw), "work" => $work);
+		}
 	}
 
 	// Get EMeter VGain and IGain Settings
@@ -831,7 +850,7 @@ class TPLinkHS110 extends IPSModule
 				}
 				break;
 			default:
-				throw new Exception("Invalid ident");
+				$this->SendDebug("Request Action:", "Invalid ident", 0);
 		}
 	}
 
