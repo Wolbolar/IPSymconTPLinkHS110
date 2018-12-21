@@ -568,8 +568,8 @@ class TPLinkHS110 extends IPSModule
 			return array("voltage" => floatval($result->emeter->get_realtime->voltage), "current" => floatval($result->emeter->get_realtime->current), "power" => floatval($result->emeter->get_realtime->power), "work" => $work);
 		}
 		else{
-			SetValueFloat($this->GetIDForIdent("Voltage"), floatval($result->emeter->get_realtime->voltage_mv));
-			$this->SendDebug("TP Link:", "Voltage: " . floatval($result->emeter->get_realtime->voltage_mv), 0);
+			SetValueFloat($this->GetIDForIdent("Voltage"), floatval($result->emeter->get_realtime->voltage_mv)/1000);
+			$this->SendDebug("TP Link:", "Voltage: " . floatval($result->emeter->get_realtime->voltage_mv)/1000, 0);
 			SetValueFloat($this->GetIDForIdent("Current"), floatval($result->emeter->get_realtime->current_ma * 1000.0));
 			$this->SendDebug("TP Link:", "Current: " . floatval($result->emeter->get_realtime->current_ma * 1000.0), 0);
 			$power = floatval($result->emeter->get_realtime->power_mw);
@@ -580,7 +580,7 @@ class TPLinkHS110 extends IPSModule
 			$work = $previous_work + ($power * $timefactor);
 			$this->SendDebug("TP Link:", "Work: " . $work, 0);
 			SetValueFloat($this->GetIDForIdent("Work"), $work);
-			return array("voltage" => floatval($result->emeter->get_realtime->voltage_mv), "current" => floatval($result->emeter->get_realtime->current_ma), "power" => floatval($result->emeter->get_realtime->power_mw), "work" => $work);
+			return array("voltage" => floatval($result->emeter->get_realtime->voltage_mv)/1000, "current" => floatval($result->emeter->get_realtime->current_ma), "power" => floatval($result->emeter->get_realtime->power_mw), "work" => $work);
 		}
 	}
 
