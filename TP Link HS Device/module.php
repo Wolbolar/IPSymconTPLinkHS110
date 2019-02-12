@@ -29,6 +29,8 @@ class TPLinkHS110 extends IPSModule
 		$this->RegisterPropertyFloat("longitude", 0);
 		$this->RegisterTimer('StateUpdate', 0, 'TPLHS_StateTimer(' . $this->InstanceID . ');');
 		$this->RegisterTimer('SystemInfoUpdate', 0, 'TPLHS_SystemInfoTimer(' . $this->InstanceID . ');');
+		//we will wait until the kernel is ready
+		$this->RegisterMessage(0, IPS_KERNELMESSAGE);
 	}
 
 	public function ApplyChanges()
@@ -36,16 +38,20 @@ class TPLinkHS110 extends IPSModule
 		//Never delete this line!
 		parent::ApplyChanges();
 
+		if (IPS_GetKernelRunlevel() !== KR_READY) {
+			return;
+		}
+
 		$this->RegisterVariableBoolean("State", "Status", "~Switch", 1);
 		$this->EnableAction("State");
 		$model = $this->ReadPropertyInteger("modelselection");
 		if ($model == 2) {
 			$this->RegisterProfile('TPLinkHS.Milliampere', '', '', " mA", 0, 0, 0, 0, 2);
 
-			$this->RegisterVariableFloat("Voltage", "Spannung", "Volt.230", 2);
-			$this->RegisterVariableFloat("Power", "Leistung", "Watt.14490", 3);
-			$this->RegisterVariableFloat("Current", "Strom", "TPLinkHS.Milliampere", 4);
-			$this->RegisterVariableFloat("Work", "Arbeit", "Electricity", 5);
+			$this->RegisterVariableFloat("Voltage", $this->Translate("Voltage"), "Volt.230", 2);
+			$this->RegisterVariableFloat("Power", $this->Translate("Power"), "Watt.14490", 3);
+			$this->RegisterVariableFloat("Current", $this->Translate("Electricity"), "TPLinkHS.Milliampere", 4);
+			$this->RegisterVariableFloat("Work", $this->Translate("Work"), "Electricity", 5);
 		}
 		$this->ValidateConfiguration();
 	}
@@ -84,6 +90,27 @@ class TPLinkHS110 extends IPSModule
 		}
 		$this->SetStateInterval($hostcheck);
 		$this->SetSystemInfoInterval($hostcheck);
+	}
+
+	public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
+	{
+
+		switch ($Message) {
+			case IM_CHANGESTATUS:
+				if ($Data[0] === IS_ACTIVE) {
+					$this->ApplyChanges();
+				}
+				break;
+
+			case IPS_KERNELMESSAGE:
+				if ($Data[0] === KR_READY) {
+					$this->ApplyChanges();
+				}
+				break;
+
+			default:
+				break;
+		}
 	}
 
 	public function StateTimer()
@@ -854,6 +881,18 @@ class TPLinkHS110 extends IPSModule
 		}
 	}
 
+	protected function GetLEDState()
+	{
+		$state = $this->ReadPropertyBoolean("ledoff");
+		if($state)
+		{
+			$led_state = "on";
+		}
+		else{
+			$led_state = "off";
+		}
+		return $led_state;
+	}
 
 	//Profile
 
@@ -932,112 +971,316 @@ class TPLinkHS110 extends IPSModule
 		$this->SendDebug($notification, $message, $format);
 	}
 
-	//Configuration Form
+	/***********************************************************
+	 * Configuration Form
+	 ***********************************************************/
+
+	/**
+	 * build configuration form
+	 * @return string
+	 */
 	public function GetConfigurationForm()
 	{
-		$formhead = $this->FormHead();
-		$formactions = $this->FormActions();
-		$formelementsend = '{ "type": "Label", "label": "__________________________________________________________________________________________________" }';
-		$formstatus = $this->FormStatus();
-		return '{ ' . $formhead . $formelementsend . '],' . $formactions . $formstatus . ' }';
+		// return current form
+		return json_encode([
+			'elements' => $this->FormHead(),
+			'actions' => $this->FormActions(),
+			'status' => $this->FormStatus()
+		]);
 	}
 
+	/**
+	 * return form configurations on configuration step
+	 * @return array
+	 */
 	protected function FormHead()
 	{
-		$form = '"elements":
-            [
-                { "type": "Label", "label": "TP Link HS type"},
-                { "type": "Select", "name": "modelselection", "caption": "model",
-					"options": [
-						{ "label": "HS100", "value": 1 },
-						{ "label": "HS110", "value": 2 }
-					]
-				},
-                { "type": "Label", "label": "TP Link HS device ip address"},
-				{
-                    "name": "Host",
-                    "type": "ValidationTextBox",
-                    "caption": "IP adress"
-                },
-                { "type": "Label", "label": "TP Link HS device state update interval"},
-                { "type": "IntervalBox", "name": "stateinterval", "caption": "seconds" },';
 		$model = $this->ReadPropertyInteger("modelselection");
-		if ($model == 2) {
-			$form .= '{ "type": "Label", "label": "TP Link HS device system info update interval"},
-                { "type": "IntervalBox", "name": "systeminfointerval", "caption": "seconds" },';
-		}
 		$softwareversion = $this->ReadPropertyString("softwareversion");
+		$form = [
+			[
+				'type' => 'Label',
+				'caption' => 'TP Link HS type'
+			],
+			[
+				'type' => 'Select',
+				'name' => 'modelselection',
+				'caption' => 'model',
+				'options' => [
+					[
+						'label' => 'HS100',
+						'value' => 1
+					],
+					[
+						'label' => 'HS110',
+						'value' => 2
+					]
+				]
+
+			],
+			[
+				'type' => 'Label',
+				'caption' => 'TP Link HS device ip address'
+			],
+			[
+				'name' => 'Host',
+				'type' => 'ValidationTextBox',
+				'caption' => 'IP adress'
+			],
+			[
+				'type' => 'Label',
+				'caption' => 'TP Link HS device state update interval'
+			],
+			[
+				'name' => 'stateinterval',
+				'type' => 'IntervalBox',
+				'caption' => 'seconds'
+			]
+		];
+		if ($model == 2) {
+			$form = array_merge_recursive(
+				$form,
+				[
+					[
+						'type' => 'Label',
+						'caption' => 'TP Link HS device system info update interval'
+					],
+					[
+						'name' => 'systeminfointerval',
+						'type' => 'IntervalBox',
+						'caption' => 'seconds'
+					]
+				]
+			);
+		}
 		if ($softwareversion == "") {
-			$form .= '{ "type": "Label", "label": "TP Link HS get system information" },
-                { "type": "Button", "label": "Get system info", "onClick": "TPLHS_WriteSystemInfo($id);" },';
-		} else {
-			$form .= '{ "type": "Label", "label": "Data is from the TP Link HS device do not edit only for information, change settings in the kasa app" },';
-			$form .= '{"name": "softwareversion", "type": "ValidationTextBox", "caption": "software version"},';
-			$form .= '{"name": "hardwareversion", "type": "ValidationTextBox", "caption": "hardware version"},';
-			$form .= '{"name": "type", "type": "ValidationTextBox", "caption": "type"},';
-			$form .= '{"name": "model", "type": "ValidationTextBox", "caption": "model"},';
-			$form .= '{"name": "mac", "type": "ValidationTextBox", "caption": "mac"},';
-			$form .= '{"name": "deviceid", "type": "ValidationTextBox", "caption": "device id"},';
-			$form .= '{"name": "hardwareid", "type": "ValidationTextBox", "caption": "hardware id"},';
-			$form .= '{"name": "firmwareid", "type": "ValidationTextBox", "caption": "firmware id"},';
-			$form .= '{"name": "oemid", "type": "ValidationTextBox", "caption": "oem id"},';
-			$form .= '{"name": "alias", "type": "ValidationTextBox", "caption": "alias"},';
-			$form .= '{"name": "devicename", "type": "ValidationTextBox", "caption": "device name"},';
-			$form .= '{"name": "rssi", "type": "ValidationTextBox", "caption": "rssi"},';
-			$form .= '{"name": "ledoff", "type": "ValidationTextBox", "caption": "led state"},';
-			$form .= '{"name": "latitude", "type": "ValidationTextBox", "caption": "latitude"},';
-			$form .= '{"name": "longitude", "type": "ValidationTextBox", "caption": "longitude"},';
+			$form = array_merge_recursive(
+				$form,
+				[
+					[
+						'type' => 'Label',
+						'caption' => 'TP Link HS get system information'
+					],
+					[
+						'type' => 'Button',
+						'caption' => 'Get system info',
+						'onClick' => 'TPLHS_WriteSystemInfo($id);'
+					]
+				]
+			);
+		}
+		else{
+			$form = array_merge_recursive(
+				$form,
+				[
+					[
+						'type' => 'Label',
+						'caption' => 'Data is from the TP Link HS device for information, change settings in the kasa app'
+					],
+					[
+						'type' => 'List',
+						'name' => 'TPLinkInformation',
+						'caption' => 'TP Link HS device information',
+						'rowCount' => 2,
+						'add' => false,
+						'delete' => false,
+						'sort' => [
+							'column' => 'model',
+							'direction' => 'ascending'
+						],
+						'columns' => [
+							[
+								'name' => 'model',
+								'caption' => 'model',
+								'width' => '100px',
+								'visible' => true
+							],
+							[
+								'name' => 'softwareversion',
+								'caption' => 'software version',
+								'width' => '150px',
+							],
+							[
+								'name' => 'hardwareversion',
+								'caption' => 'hardware version',
+								'width' => '150px',
+							],
+							[
+								'name' => 'type',
+								'caption' => 'type',
+								'width' => 'auto',
+							],
+							[
+								'name' => 'mac',
+								'caption' => 'mac',
+								'width' => '150px',
+							],
+							[
+								'name' => 'deviceid',
+								'caption' => 'device id',
+								'width' => '200px',
+							],
+							[
+								'name' => 'hardwareid',
+								'caption' => 'hardware id',
+								'width' => '200px',
+							],
+							[
+								'name' => 'firmwareid',
+								'caption' => 'firmware id',
+								'width' => '200px',
+							],
+							[
+								'name' => 'oemid',
+								'caption' => 'oem id',
+								'width' => '200px',
+							],
+							[
+								'name' => 'alias',
+								'caption' => 'alias',
+								'width' => '150px',
+							],
+							[
+								'name' => 'devicename',
+								'caption' => 'device name',
+								'width' => '190px',
+							],
+							[
+								'name' => 'rssi',
+								'caption' => 'rssi',
+								'width' => '50px',
+							],
+							[
+								'name' => 'ledoff',
+								'caption' => 'led state',
+								'width' => '95px',
+							],
+							[
+								'name' => 'latitude',
+								'caption' => 'latitude',
+								'width' => '110px',
+							],
+							[
+								'name' => 'longitude',
+								'caption' => 'longitude',
+								'width' => '110px',
+							]
+						],
+						'values' => [
+							[
+								'model' => $this->ReadPropertyString("model"),
+								'softwareversion' => $this->ReadPropertyString("softwareversion"),
+								'hardwareversion' => $this->ReadPropertyFloat("hardwareversion"),
+								'type' => $this->ReadPropertyString("type"),
+								'mac' => $this->ReadPropertyString("mac"),
+								'deviceid' => $this->ReadPropertyString("deviceid"),
+								'hardwareid' => $this->ReadPropertyString("hardwareid"),
+								'firmwareid' => $this->ReadPropertyString("firmwareid"),
+								'oemid' => $this->ReadPropertyString("oemid"),
+								'alias' => $this->ReadPropertyString("alias"),
+								'devicename' => $this->ReadPropertyString("devicename"),
+								'rssi' => $this->ReadPropertyInteger("rssi"),
+								'ledoff' => $this->GetLEDState(),
+								'latitude' => $this->ReadPropertyFloat("latitude"),
+								'longitude' => $this->ReadPropertyFloat("longitude")
+							]]
+					]
+				]
+			);
 		}
 		return $form;
 	}
 
+	/**
+	 * return form actions by token
+	 * @return array
+	 */
 	protected function FormActions()
 	{
-		$form = '"actions":
+		$form = [
 			[
-				{ "type": "Label", "label": "TP Link HS device" },
-				{ "type": "Label", "label": "TP Link HS get system information" },
-				{ "type": "Button", "label": "Get system info", "onClick": "TPLHS_WriteSystemInfo($id);" },
-				{ "type": "Label", "label": "TP Link HS Power On" },
-				{ "type": "Button", "label": "On", "onClick": "TPLHS_PowerOn($id);" },
-				{ "type": "Label", "label": "TP Link HS Power Off" },
-				{ "type": "Button", "label": "Off", "onClick": "TPLHS_PowerOff($id);" },
-				{ "type": "Label", "label": "Reset Work" },
-				{ "type": "Button", "label": "Reset Work", "onClick": "TPLHS_ResetWork($id);" }
-			],';
+				'type' => 'Label',
+				'caption' => 'TP Link HS device'
+			],
+			[
+				'type' => 'Label',
+				'caption' => 'TP Link HS get system information'
+			],
+			[
+				'type' => 'Button',
+				'caption' => 'Get system info',
+				'onClick' => 'TPLHS_WriteSystemInfo($id);'
+			],
+			[
+				'type' => 'Label',
+				'caption' => 'TP Link HS Power On'
+			],
+			[
+				'type' => 'Button',
+				'caption' => 'On',
+				'onClick' => 'TPLHS_PowerOn($id);'
+			],
+			[
+				'type' => 'Label',
+				'caption' => 'TP Link HS Power Off'
+			],
+			[
+				'type' => 'Button',
+				'caption' => 'Off',
+				'onClick' => 'TPLHS_PowerOff($id);'
+			],
+			[
+				'type' => 'Label',
+				'caption' => 'Reset Work'
+			],
+			[
+				'type' => 'Button',
+				'caption' => 'Reset Work',
+				'onClick' => 'TPLHS_ResetWork($id);'
+			]
+		];
 		return $form;
 	}
 
+	/**
+	 * return from status
+	 * @return array
+	 */
 	protected function FormStatus()
 	{
-		$form = '"status":
-            [
-                {
-                    "code": 101,
-                    "icon": "inactive",
-                    "caption": "Creating instance."
-                },
-				{
-                    "code": 102,
-                    "icon": "active",
-                    "caption": "instance created."
-                },
-                {
-                    "code": 104,
-                    "icon": "inactive",
-                    "caption": "interface closed."
-                },
-                {
-                    "code": 202,
-                    "icon": "error",
-                    "caption": "special errorcode."
-                },
-                {
-                    "code": 203,
-                    "icon": "error",
-                    "caption": "IP Address is not valid."
-                }
-            ]';
+		$form = [
+			[
+				'code' => 101,
+				'icon' => 'inactive',
+				'caption' => 'Creating instance.'
+			],
+			[
+				'code' => 102,
+				'icon' => 'active',
+				'caption' => 'instance created.'
+			],
+			[
+				'code' => 104,
+				'icon' => 'inactive',
+				'caption' => 'interface closed.'
+			],
+			[
+				'code' => 201,
+				'icon' => 'inactive',
+				'caption' => 'Please follow the instructions.'
+			],
+			[
+				'code' => 202,
+				'icon' => 'error',
+				'caption' => 'special errorcode.'
+			],
+			[
+				'code' => 202,
+				'icon' => 'error',
+				'caption' => 'IP Address is not valid.'
+			]
+		];
+
 		return $form;
 	}
 }
