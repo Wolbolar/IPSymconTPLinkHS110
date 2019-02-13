@@ -1275,7 +1275,7 @@ class TPLinkHS110 extends IPSModule
 				'caption' => 'special errorcode.'
 			],
 			[
-				'code' => 202,
+				'code' => 203,
 				'icon' => 'error',
 				'caption' => 'IP Address is not valid.'
 			]
