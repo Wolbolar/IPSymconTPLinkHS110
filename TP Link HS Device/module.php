@@ -27,6 +27,8 @@ class TPLinkHS110 extends IPSModule
 		$this->RegisterPropertyBoolean("ledoff", false);
 		$this->RegisterPropertyFloat("latitude", 0);
 		$this->RegisterPropertyFloat("longitude", 0);
+		$this->RegisterAttributeBoolean("Timeout", false);
+		$this->RegisterAttributeInteger("NumberRequests", 0);
 		$this->RegisterTimer('StateUpdate', 0, 'TPLHS_StateTimer(' . $this->InstanceID . ');');
 		$this->RegisterTimer('SystemInfoUpdate', 0, 'TPLHS_SystemInfoTimer(' . $this->InstanceID . ');');
 		//we will wait until the kernel is ready
@@ -115,12 +117,20 @@ class TPLinkHS110 extends IPSModule
 
 	public function StateTimer()
 	{
-		$this->GetSystemInfo();
+		$timeout = $this->ReadAttributeBoolean("Timeout");
+		if(!$timeout)
+		{
+			$this->GetSystemInfo();
+		}
 	}
 
 	public function SystemInfoTimer()
 	{
-		$this->GetRealtimeCurrent();
+		$timeout = $this->ReadAttributeBoolean("Timeout");
+		if(!$timeout)
+		{
+			$this->GetRealtimeCurrent();
+		}
 	}
 
 	public function ResetWork()
@@ -201,6 +211,7 @@ class TPLinkHS110 extends IPSModule
 			$errorcode = socket_last_error();
 			$errormsg = socket_strerror($errorcode);
 			$this->SendDebug("TP Link Socket:", "Couldn't create socket: [" . $errorcode . "] " . $errormsg, 0);
+			$this->AddNumberRequest();
 			die("Couldn't create socket: [$errorcode] $errormsg \n");
 		}
 		$this->SendDebug("TP Link:", "Create Socket", 0);
@@ -210,10 +221,29 @@ class TPLinkHS110 extends IPSModule
 			$errorcode = socket_last_error();
 			$errormsg = socket_strerror($errorcode);
 			$this->SendDebug("TP Link Socket:", "Could not connect: [" . $errorcode . "] " . $errormsg, 0);
+			$this->AddNumberRequest();
 			die("Could not connect: [$errorcode] $errormsg \n");
 		}
 		$this->SendDebug("TP Link:", "Connection established", 0);
+		$this->DeleteNumberRequest();
 		return $sock1;
+	}
+
+	protected function AddNumberRequest()
+	{
+		$i = $this->ReadAttributeInteger("NumberRequests");
+		$i = $i +1;
+		$this->WriteAttributeInteger("NumberRequests", $i);
+		if($i > 15)
+		{
+			$this->WriteAttributeBoolean("Timeout", true);
+		}
+	}
+
+	protected function DeleteNumberRequest()
+	{
+		$this->WriteAttributeInteger("NumberRequests", 0);
+		$this->WriteAttributeBoolean("Timeout", false);
 	}
 
 	protected function sendToSocket($messageToSend, $sock)
@@ -1239,6 +1269,24 @@ class TPLinkHS110 extends IPSModule
 				'onClick' => 'TPLHS_ResetWork($id);'
 			]
 		];
+		$timeout = $this->ReadAttributeBoolean("Timeout");
+		if($timeout)
+		{
+			$form = array_merge_recursive(
+				$form,
+				[
+					[
+						'type' => 'Label',
+						'caption' => 'Get System Info'
+					],
+					[
+						'type' => 'Button',
+						'caption' => 'Get System Info',
+						'onClick' => 'TPLHS_GetSystemInfo($id);'
+					]
+				]
+			);
+		}
 		return $form;
 	}
 
