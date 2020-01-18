@@ -30,7 +30,7 @@ The module can send commands from IP-Symcon to a TP Link HS 100 or TP Link HS 11
 
 ### a. Loading the module
 
-Open the IP Console's web console with _http://<IP-Symcon IP>:3777/console/_.
+Open the IP Console's web console with _http://{IP-Symcon IP}:3777/console/_.
 
 Then click on the module store icon in the upper right corner.
 
