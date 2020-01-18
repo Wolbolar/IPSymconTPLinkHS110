@@ -1,34 +1,35 @@
 <?php
 
+declare(strict_types=1);
+
 class TPLinkHS110 extends IPSModule
 {
-
     public function Create()
     {
         //Never delete this line!
         parent::Create();
-        $this->RegisterPropertyString("Host", "");
-        $this->RegisterPropertyInteger("modelselection", 1);
-        $this->RegisterPropertyInteger("stateinterval", 0);
-        $this->RegisterPropertyInteger("systeminfointerval", 0);
-        $this->RegisterPropertyBoolean("extendedinfo", false);
-        $this->RegisterPropertyString("softwareversion", "");
-        $this->RegisterPropertyFloat("hardwareversion", 0);
-        $this->RegisterPropertyString("type", "");
-        $this->RegisterPropertyString("model", "");
-        $this->RegisterPropertyString("mac", "");
-        $this->RegisterPropertyString("deviceid", "");
-        $this->RegisterPropertyString("hardwareid", "");
-        $this->RegisterPropertyString("firmwareid", "");
-        $this->RegisterPropertyString("oemid", "");
-        $this->RegisterPropertyString("alias", "");
-        $this->RegisterPropertyString("devicename", "");
-        $this->RegisterPropertyInteger("rssi", 0);
-        $this->RegisterPropertyBoolean("ledoff", false);
-        $this->RegisterPropertyFloat("latitude", 0);
-        $this->RegisterPropertyFloat("longitude", 0);
-        $this->RegisterAttributeBoolean("Timeout", false);
-        $this->RegisterAttributeInteger("NumberRequests", 0);
+        $this->RegisterPropertyString('Host', '');
+        $this->RegisterPropertyInteger('modelselection', 1);
+        $this->RegisterPropertyInteger('stateinterval', 0);
+        $this->RegisterPropertyInteger('systeminfointerval', 0);
+        $this->RegisterPropertyBoolean('extendedinfo', false);
+        $this->RegisterPropertyString('softwareversion', '');
+        $this->RegisterPropertyFloat('hardwareversion', 0);
+        $this->RegisterPropertyString('type', '');
+        $this->RegisterPropertyString('model', '');
+        $this->RegisterPropertyString('mac', '');
+        $this->RegisterPropertyString('deviceid', '');
+        $this->RegisterPropertyString('hardwareid', '');
+        $this->RegisterPropertyString('firmwareid', '');
+        $this->RegisterPropertyString('oemid', '');
+        $this->RegisterPropertyString('alias', '');
+        $this->RegisterPropertyString('devicename', '');
+        $this->RegisterPropertyInteger('rssi', 0);
+        $this->RegisterPropertyBoolean('ledoff', false);
+        $this->RegisterPropertyFloat('latitude', 0);
+        $this->RegisterPropertyFloat('longitude', 0);
+        $this->RegisterAttributeBoolean('Timeout', false);
+        $this->RegisterAttributeInteger('NumberRequests', 0);
         $this->RegisterTimer('StateUpdate', 0, 'TPLHS_StateTimer(' . $this->InstanceID . ');');
         $this->RegisterTimer('SystemInfoUpdate', 0, 'TPLHS_SystemInfoTimer(' . $this->InstanceID . ');');
         //we will wait until the kernel is ready
@@ -44,16 +45,16 @@ class TPLinkHS110 extends IPSModule
             return;
         }
 
-        $this->RegisterVariableBoolean("State", "Status", "~Switch", 1);
-        $this->EnableAction("State");
-        $model = $this->ReadPropertyInteger("modelselection");
+        $this->RegisterVariableBoolean('State', 'Status', '~Switch', 1);
+        $this->EnableAction('State');
+        $model = $this->ReadPropertyInteger('modelselection');
         if ($model == 2) {
-            $this->RegisterProfile('TPLinkHS.Milliampere', '', '', " mA", 0, 0, 0, 0, 2);
+            $this->RegisterProfile('TPLinkHS.Milliampere', '', '', ' mA', 0, 0, 0, 0, 2);
 
-            $this->RegisterVariableFloat("Voltage", $this->Translate("Voltage"), "Volt.230", 2);
-            $this->RegisterVariableFloat("Power", $this->Translate("Power"), "Watt.14490", 3);
-            $this->RegisterVariableFloat("Current", $this->Translate("Electricity"), "TPLinkHS.Milliampere", 4);
-            $this->RegisterVariableFloat("Work", $this->Translate("Work"), "Electricity", 5);
+            $this->RegisterVariableFloat('Voltage', $this->Translate('Voltage'), 'Volt.230', 2);
+            $this->RegisterVariableFloat('Power', $this->Translate('Power'), 'Watt.14490', 3);
+            $this->RegisterVariableFloat('Current', $this->Translate('Electricity'), 'TPLinkHS.Milliampere', 4);
+            $this->RegisterVariableFloat('Work', $this->Translate('Work'), 'Electricity', 5);
         }
         $this->ValidateConfiguration();
     }
@@ -86,9 +87,9 @@ class TPLinkHS110 extends IPSModule
             $hostcheck = false;
             $this->SetStatus(203); //IP Adresse oder Host ist ungültig
         }
-        $extendedinfo = $this->ReadPropertyBoolean("extendedinfo");
+        $extendedinfo = $this->ReadPropertyBoolean('extendedinfo');
         if ($extendedinfo) {
-            $this->SendDebug("TP Link:", "extended info activ", 0);
+            $this->SendDebug('TP Link:', 'extended info activ', 0);
         }
         $this->SetStateInterval($hostcheck);
         $this->SetSystemInfoInterval($hostcheck);
@@ -117,7 +118,7 @@ class TPLinkHS110 extends IPSModule
 
     public function StateTimer()
     {
-        $timeout = $this->ReadAttributeBoolean("Timeout");
+        $timeout = $this->ReadAttributeBoolean('Timeout');
         if (!$timeout) {
             $this->GetSystemInfo();
         }
@@ -125,7 +126,7 @@ class TPLinkHS110 extends IPSModule
 
     public function SystemInfoTimer()
     {
-        $timeout = $this->ReadAttributeBoolean("Timeout");
+        $timeout = $this->ReadAttributeBoolean('Timeout');
         if (!$timeout) {
             $this->GetRealtimeCurrent();
         }
@@ -136,20 +137,20 @@ class TPLinkHS110 extends IPSModule
      */
     public function ResetWork()
     {
-        $result = SetValueFloat($this->GetIDForIdent("Work"), 0.0);
+        $result = SetValueFloat($this->GetIDForIdent('Work'), 0.0);
         return $result;
     }
 
     protected function SetStateInterval($hostcheck)
     {
         if ($hostcheck) {
-            $devicetype    = $this->ReadPropertyInteger("modelselection");
-            $stateinterval = $this->ReadPropertyInteger("stateinterval");
+            $devicetype    = $this->ReadPropertyInteger('modelselection');
+            $stateinterval = $this->ReadPropertyInteger('stateinterval');
             $interval      = $stateinterval * 1000;
             if ($devicetype == 2) {
-                $this->SetTimerInterval("StateUpdate", $interval);
+                $this->SetTimerInterval('StateUpdate', $interval);
             } else {
-                $this->SetTimerInterval("StateUpdate", $interval);
+                $this->SetTimerInterval('StateUpdate', $interval);
             }
         }
     }
@@ -157,13 +158,13 @@ class TPLinkHS110 extends IPSModule
     protected function SetSystemInfoInterval($hostcheck)
     {
         if ($hostcheck) {
-            $devicetype   = $this->ReadPropertyInteger("modelselection");
-            $infointerval = $this->ReadPropertyInteger("systeminfointerval");
+            $devicetype   = $this->ReadPropertyInteger('modelselection');
+            $infointerval = $this->ReadPropertyInteger('systeminfointerval');
             $interval     = $infointerval * 1000;
             if ($devicetype == 2) {
-                $this->SetTimerInterval("SystemInfoUpdate", $interval);
+                $this->SetTimerInterval('SystemInfoUpdate', $interval);
             } else {
-                $this->SetTimerInterval("SystemInfoUpdate", 0);
+                $this->SetTimerInterval('SystemInfoUpdate', 0);
             }
         }
     }
@@ -211,70 +212,69 @@ class TPLinkHS110 extends IPSModule
         if (!($sock1 = socket_create(AF_INET, SOCK_STREAM, SOL_TCP))) {
             $errorcode = socket_last_error();
             $errormsg  = socket_strerror($errorcode);
-            $this->SendDebug("TP Link Socket:", "Couldn't create socket: [" . $errorcode . "] " . $errormsg, 0);
+            $this->SendDebug('TP Link Socket:', "Couldn't create socket: [" . $errorcode . '] ' . $errormsg, 0);
             $this->AddNumberRequest();
             die("Couldn't create socket: [$errorcode] $errormsg \n");
         }
-        $this->SendDebug("TP Link:", "Create Socket", 0);
+        $this->SendDebug('TP Link:', 'Create Socket', 0);
 
         //Connect socket to remote server
         if (!socket_connect($sock1, $host, 9999)) {
             $errorcode = socket_last_error();
             $errormsg  = socket_strerror($errorcode);
-            $this->SendDebug("TP Link Socket:", "Could not connect: [" . $errorcode . "] " . $errormsg, 0);
+            $this->SendDebug('TP Link Socket:', 'Could not connect: [' . $errorcode . '] ' . $errormsg, 0);
             $this->AddNumberRequest();
             die("Could not connect: [$errorcode] $errormsg \n");
         }
-        $this->SendDebug("TP Link:", "Connection established", 0);
+        $this->SendDebug('TP Link:', 'Connection established', 0);
         $this->DeleteNumberRequest();
         return $sock1;
     }
 
     protected function AddNumberRequest()
     {
-        $i = $this->ReadAttributeInteger("NumberRequests");
+        $i = $this->ReadAttributeInteger('NumberRequests');
         $i = $i + 1;
-        $this->SendDebug("TP Link Socket:", "Couldn't connect socket " . $i . " times", 0);
-        $this->WriteAttributeInteger("NumberRequests", $i);
+        $this->SendDebug('TP Link Socket:', "Couldn't connect socket " . $i . ' times', 0);
+        $this->WriteAttributeInteger('NumberRequests', $i);
         if ($i > 15) {
-            $this->WriteAttributeBoolean("Timeout", true);
+            $this->WriteAttributeBoolean('Timeout', true);
         }
     }
 
     protected function DeleteNumberRequest()
     {
-        $this->WriteAttributeInteger("NumberRequests", 0);
-        $this->WriteAttributeBoolean("Timeout", false);
+        $this->WriteAttributeInteger('NumberRequests', 0);
+        $this->WriteAttributeBoolean('Timeout', false);
     }
 
     protected function sendToSocket($messageToSend, $sock)
     {
-        $this->SendDebug("TP Link Socket:", "Send Command: " . $messageToSend, 0);
+        $this->SendDebug('TP Link Socket:', 'Send Command: ' . $messageToSend, 0);
         $message = $this->encrypt($messageToSend);
 
         //Send the message to the server
         if (!socket_send($sock, $message, strlen($message), 0)) {
             $errorcode = socket_last_error();
             $errormsg  = socket_strerror($errorcode);
-            $this->SendDebug("TP Link Socket:", "Could not send data: [" . $errorcode . "] " . $errormsg, 0);
+            $this->SendDebug('TP Link Socket:', 'Could not send data: [' . $errorcode . '] ' . $errormsg, 0);
             die("Could not send data: [$errorcode] $errormsg \n");
         }
-        $this->SendDebug("TP Link:", "Message send successfully", 0);
+        $this->SendDebug('TP Link:', 'Message send successfully', 0);
     }
 
     protected function getResultFromSocket($sock)
     {
         //Now receive reply from server
-        $buf = "";
+        $buf = '';
         if (socket_recv($sock, $buf, 2048, MSG_WAITALL) === false) {
             $errorcode = socket_last_error();
             $errormsg  = socket_strerror($errorcode);
-            $this->SendDebug("TP Link Socket:", "Could not receive data: [" . $errorcode . "] " . $errormsg, 0);
+            $this->SendDebug('TP Link Socket:', 'Could not receive data: [' . $errorcode . '] ' . $errormsg, 0);
             die("Could not receive data: [$errorcode] $errormsg \n");
         }
         return $buf;
     }
-
 
     protected function SendToTPLink($command)
     {
@@ -283,7 +283,7 @@ class TPLinkHS110 extends IPSModule
         $buf    = $this->getResultFromSocket($sock);
         $result = json_decode($this->decrypt($buf));
         socket_close($sock);
-        $this->SendDebug("TP Link Socket:", "Result: " . json_encode($result), 0);
+        $this->SendDebug('TP Link Socket:', 'Result: ' . json_encode($result), 0);
         return $result;
     }
 
@@ -300,12 +300,12 @@ class TPLinkHS110 extends IPSModule
         $result      = $this->SendToTPLink($command);
         if(empty($result))
         {
-            $this->SendDebug("TP Link:", "Result empty", 0);
+            $this->SendDebug('TP Link:', 'Result empty', 0);
         }
         else
         {
             $systeminfo  = $result->system->get_sysinfo;
-            if(property_exists($systeminfo, "err_code"))
+            if(property_exists($systeminfo, 'err_code'))
             {
                 $err_code    = intval($systeminfo->err_code);
             }
@@ -313,7 +313,7 @@ class TPLinkHS110 extends IPSModule
             {
                 $err_code      = '';
             }
-            if(property_exists($systeminfo, "sw_ver"))
+            if(property_exists($systeminfo, 'sw_ver'))
             {
                 $sw_ver      = $systeminfo->sw_ver;
             }
@@ -321,7 +321,7 @@ class TPLinkHS110 extends IPSModule
             {
                 $sw_ver      = '';
             }
-            if(property_exists($systeminfo, "hw_ver"))
+            if(property_exists($systeminfo, 'hw_ver'))
             {
                 $hw_ver      = floatval($systeminfo->hw_ver);
             }
@@ -329,7 +329,7 @@ class TPLinkHS110 extends IPSModule
             {
                 $hw_ver      = '';
             }
-            if(property_exists($systeminfo, "type"))
+            if(property_exists($systeminfo, 'type'))
             {
                 $type        = $systeminfo->type;
             }
@@ -337,7 +337,7 @@ class TPLinkHS110 extends IPSModule
             {
                 $type      = '';
             }
-            if(property_exists($systeminfo, "model"))
+            if(property_exists($systeminfo, 'model'))
             {
                 $model       = $systeminfo->model;
             }
@@ -345,7 +345,7 @@ class TPLinkHS110 extends IPSModule
             {
                 $model      = '';
             }
-            if(property_exists($systeminfo, "mac"))
+            if(property_exists($systeminfo, 'mac'))
             {
                 $mac         = $systeminfo->mac;
             }
@@ -353,7 +353,7 @@ class TPLinkHS110 extends IPSModule
             {
                 $mac      = '';
             }
-            if(property_exists($systeminfo, "deviceId"))
+            if(property_exists($systeminfo, 'deviceId'))
             {
                 $deviceId    = $systeminfo->deviceId;
             }
@@ -361,7 +361,7 @@ class TPLinkHS110 extends IPSModule
             {
                 $deviceId      = '';
             }
-            if(property_exists($systeminfo, "hwId"))
+            if(property_exists($systeminfo, 'hwId'))
             {
                 $hwId        = $systeminfo->hwId;
             }
@@ -369,7 +369,7 @@ class TPLinkHS110 extends IPSModule
             {
                 $hwId      = '';
             }
-            if(property_exists($systeminfo, "fwId"))
+            if(property_exists($systeminfo, 'fwId'))
             {
                 $fwId        = $systeminfo->fwId;
             }
@@ -377,7 +377,7 @@ class TPLinkHS110 extends IPSModule
             {
                 $fwId      = '';
             }
-            if(property_exists($systeminfo, "oemId"))
+            if(property_exists($systeminfo, 'oemId'))
             {
                 $oemId       = $systeminfo->oemId;
             }
@@ -385,7 +385,7 @@ class TPLinkHS110 extends IPSModule
             {
                 $oemId      = '';
             }
-            if(property_exists($systeminfo, "alias"))
+            if(property_exists($systeminfo, 'alias'))
             {
                 $alias       = $systeminfo->alias;
             }
@@ -393,7 +393,7 @@ class TPLinkHS110 extends IPSModule
             {
                 $alias      = '';
             }
-            if(property_exists($systeminfo, "dev_name"))
+            if(property_exists($systeminfo, 'dev_name'))
             {
                 $dev_name    = $systeminfo->dev_name;
             }
@@ -401,7 +401,7 @@ class TPLinkHS110 extends IPSModule
             {
                 $dev_name      = '';
             }
-            if(property_exists($systeminfo, "icon_hash"))
+            if(property_exists($systeminfo, 'icon_hash'))
             {
                 $icon_hash   = $systeminfo->icon_hash;
             }
@@ -409,7 +409,7 @@ class TPLinkHS110 extends IPSModule
             {
                 $icon_hash      = '';
             }
-            if(property_exists($systeminfo, "relay_state"))
+            if(property_exists($systeminfo, 'relay_state'))
             {
                 $relay_state = boolval($systeminfo->relay_state);
             }
@@ -417,7 +417,7 @@ class TPLinkHS110 extends IPSModule
             {
                 $relay_state      = false;
             }
-            if(property_exists($systeminfo, "on_time"))
+            if(property_exists($systeminfo, 'on_time'))
             {
                 $on_time     = intval($systeminfo->on_time);
             }
@@ -425,7 +425,7 @@ class TPLinkHS110 extends IPSModule
             {
                 $on_time      = '';
             }
-            if(property_exists($systeminfo, "active_mode"))
+            if(property_exists($systeminfo, 'active_mode'))
             {
                 $active_mode = $systeminfo->active_mode;
             }
@@ -433,7 +433,7 @@ class TPLinkHS110 extends IPSModule
             {
                 $active_mode      = '';
             }
-            if(property_exists($systeminfo, "feature"))
+            if(property_exists($systeminfo, 'feature'))
             {
                 $feature     = $systeminfo->feature;
             }
@@ -441,7 +441,7 @@ class TPLinkHS110 extends IPSModule
             {
                 $feature      = '';
             }
-            if(property_exists($systeminfo, "rssi"))
+            if(property_exists($systeminfo, 'rssi'))
             {
                 $rssi        = intval($systeminfo->rssi);
             }
@@ -449,7 +449,7 @@ class TPLinkHS110 extends IPSModule
             {
                 $rssi      = 0;
             }
-            if(property_exists($systeminfo, "led_off"))
+            if(property_exists($systeminfo, 'led_off'))
             {
                 $led_off     = boolval($systeminfo->led_off);
             }
@@ -467,35 +467,34 @@ class TPLinkHS110 extends IPSModule
             } else {
                 $longitude = 0;
             }
-            SetValueBoolean($this->GetIDForIdent("State"), $relay_state);
+            SetValueBoolean($this->GetIDForIdent('State'), $relay_state);
 
-
-            $extendedinfo = $this->ReadPropertyBoolean("extendedinfo");
+            $extendedinfo = $this->ReadPropertyBoolean('extendedinfo');
             if ($extendedinfo) {
-                SetValueString($this->GetIDForIdent("alias"), $alias);
+                SetValueString($this->GetIDForIdent('alias'), $alias);
             }
             $systeminfo = [
-                "state"           => $relay_state,
-                "errorcode"       => $err_code,
-                "softwareversion" => $sw_ver,
-                "hardwareversion" => $hw_ver,
-                "type"            => $type,
-                "model"           => $model,
-                "mac"             => $mac,
-                "deviceid"        => $deviceId,
-                "hardwareid"      => $hwId,
-                "firmwareid"      => $fwId,
-                "oemid"           => $oemId,
-                "alias"           => $alias,
-                "devicename"      => $dev_name,
-                "iconhash"        => $icon_hash,
-                "ontime"          => $on_time,
-                "active_mode"     => $active_mode,
-                "feature"         => $feature,
-                "rssi"            => $rssi,
-                "ledoff"          => $led_off,
-                "latitude"        => $latitude,
-                "longitude"       => $longitude];
+                'state'           => $relay_state,
+                'errorcode'       => $err_code,
+                'softwareversion' => $sw_ver,
+                'hardwareversion' => $hw_ver,
+                'type'            => $type,
+                'model'           => $model,
+                'mac'             => $mac,
+                'deviceid'        => $deviceId,
+                'hardwareid'      => $hwId,
+                'firmwareid'      => $fwId,
+                'oemid'           => $oemId,
+                'alias'           => $alias,
+                'devicename'      => $dev_name,
+                'iconhash'        => $icon_hash,
+                'ontime'          => $on_time,
+                'active_mode'     => $active_mode,
+                'feature'         => $feature,
+                'rssi'            => $rssi,
+                'ledoff'          => $led_off,
+                'latitude'        => $latitude,
+                'longitude'       => $longitude];
         }
         return $systeminfo;
     }
@@ -503,21 +502,21 @@ class TPLinkHS110 extends IPSModule
     public function WriteSystemInfo()
     {
         $systeminfo = $this->GetSystemInfo();
-        IPS_SetProperty($this->InstanceID, "softwareversion", $systeminfo["softwareversion"]);
-        IPS_SetProperty($this->InstanceID, "hardwareversion", $systeminfo["hardwareversion"]);
-        IPS_SetProperty($this->InstanceID, "type", $systeminfo["type"]);
-        IPS_SetProperty($this->InstanceID, "model", $systeminfo["model"]);
-        IPS_SetProperty($this->InstanceID, "mac", $systeminfo["mac"]);
-        IPS_SetProperty($this->InstanceID, "deviceid", $systeminfo["deviceid"]);
-        IPS_SetProperty($this->InstanceID, "hardwareid", $systeminfo["hardwareid"]);
-        IPS_SetProperty($this->InstanceID, "firmwareid", $systeminfo["firmwareid"]);
-        IPS_SetProperty($this->InstanceID, "oemid", $systeminfo["oemid"]);
-        IPS_SetProperty($this->InstanceID, "alias", $systeminfo["alias"]);
-        IPS_SetProperty($this->InstanceID, "devicename", $systeminfo["devicename"]);
-        IPS_SetProperty($this->InstanceID, "rssi", $systeminfo["rssi"]);
-        IPS_SetProperty($this->InstanceID, "ledoff", $systeminfo["ledoff"]);
-        IPS_SetProperty($this->InstanceID, "latitude", $systeminfo["latitude"]);
-        IPS_SetProperty($this->InstanceID, "longitude", $systeminfo["longitude"]);
+        IPS_SetProperty($this->InstanceID, 'softwareversion', $systeminfo['softwareversion']);
+        IPS_SetProperty($this->InstanceID, 'hardwareversion', $systeminfo['hardwareversion']);
+        IPS_SetProperty($this->InstanceID, 'type', $systeminfo['type']);
+        IPS_SetProperty($this->InstanceID, 'model', $systeminfo['model']);
+        IPS_SetProperty($this->InstanceID, 'mac', $systeminfo['mac']);
+        IPS_SetProperty($this->InstanceID, 'deviceid', $systeminfo['deviceid']);
+        IPS_SetProperty($this->InstanceID, 'hardwareid', $systeminfo['hardwareid']);
+        IPS_SetProperty($this->InstanceID, 'firmwareid', $systeminfo['firmwareid']);
+        IPS_SetProperty($this->InstanceID, 'oemid', $systeminfo['oemid']);
+        IPS_SetProperty($this->InstanceID, 'alias', $systeminfo['alias']);
+        IPS_SetProperty($this->InstanceID, 'devicename', $systeminfo['devicename']);
+        IPS_SetProperty($this->InstanceID, 'rssi', $systeminfo['rssi']);
+        IPS_SetProperty($this->InstanceID, 'ledoff', $systeminfo['ledoff']);
+        IPS_SetProperty($this->InstanceID, 'latitude', $systeminfo['latitude']);
+        IPS_SetProperty($this->InstanceID, 'longitude', $systeminfo['longitude']);
         IPS_ApplyChanges($this->InstanceID);
     }
 
@@ -539,7 +538,6 @@ class TPLinkHS110 extends IPSModule
         return $this->SendToTPLink($command);
     }
 
-
     /** Power Off
      * @return mixed
      */
@@ -548,7 +546,6 @@ class TPLinkHS110 extends IPSModule
         $command = '{"system":{"set_relay_state":{"state":0}}}';
         return $this->SendToTPLink($command);
     }
-
 
     /** Reset (To Factory Settings)
      * @return mixed
@@ -559,7 +556,6 @@ class TPLinkHS110 extends IPSModule
         return $this->SendToTPLink($command);
     }
 
-
     /** Turn Off Device LED (Night mode)
      * @return mixed
      */
@@ -568,7 +564,6 @@ class TPLinkHS110 extends IPSModule
         $command = '{"system":{"set_led_off":{"off":1}}}';
         return $this->SendToTPLink($command);
     }
-
 
     /** Set Device Alias
      * @param string $alias
@@ -581,7 +576,6 @@ class TPLinkHS110 extends IPSModule
         return $this->SendToTPLink($command);
     }
 
-
     /** Set MAC Address
      * @param string $mac
      *
@@ -593,7 +587,6 @@ class TPLinkHS110 extends IPSModule
         $command = '{"system":{"set_mac_addr":{"mac":"' . $mac . '"}}}';
         return $this->SendToTPLink($command);
     }
-
 
     /** Set Device ID
      * @param string $deviceid
@@ -770,43 +763,43 @@ class TPLinkHS110 extends IPSModule
     {
         $command         = '{"emeter":{"get_realtime":{}}}';
         $result          = $this->SendToTPLink($command);
-        $hardwareversion = $this->ReadPropertyFloat("hardwareversion");
+        $hardwareversion = $this->ReadPropertyFloat('hardwareversion');
         if ($hardwareversion == 1) {
-            SetValueFloat($this->GetIDForIdent("Voltage"), floatval($result->emeter->get_realtime->voltage));
-            $this->SendDebug("TP Link:", "Voltage: " . floatval($result->emeter->get_realtime->voltage), 0);
-            SetValueFloat($this->GetIDForIdent("Current"), floatval($result->emeter->get_realtime->current * 1000.0));
-            $this->SendDebug("TP Link:", "Current: " . floatval($result->emeter->get_realtime->current * 1000.0), 0);
+            SetValueFloat($this->GetIDForIdent('Voltage'), floatval($result->emeter->get_realtime->voltage));
+            $this->SendDebug('TP Link:', 'Voltage: ' . floatval($result->emeter->get_realtime->voltage), 0);
+            SetValueFloat($this->GetIDForIdent('Current'), floatval($result->emeter->get_realtime->current * 1000.0));
+            $this->SendDebug('TP Link:', 'Current: ' . floatval($result->emeter->get_realtime->current * 1000.0), 0);
             $power = floatval($result->emeter->get_realtime->power);
-            $this->SendDebug("TP Link:", "Power: " . $power, 0);
-            SetValueFloat($this->GetIDForIdent("Power"), $power);
-            $previous_work = GetValueFloat($this->GetIDForIdent("Work"));
-            $timefactor    = floatval($this->ReadPropertyInteger("systeminfointerval") / 3600.0);
+            $this->SendDebug('TP Link:', 'Power: ' . $power, 0);
+            SetValueFloat($this->GetIDForIdent('Power'), $power);
+            $previous_work = GetValueFloat($this->GetIDForIdent('Work'));
+            $timefactor    = floatval($this->ReadPropertyInteger('systeminfointerval') / 3600.0);
             $work          = $previous_work + ($power * $timefactor);
-            $this->SendDebug("TP Link:", "Work: " . $work, 0);
-            SetValueFloat($this->GetIDForIdent("Work"), $work);
+            $this->SendDebug('TP Link:', 'Work: ' . $work, 0);
+            SetValueFloat($this->GetIDForIdent('Work'), $work);
             return [
-                "voltage" => floatval($result->emeter->get_realtime->voltage),
-                "current" => floatval($result->emeter->get_realtime->current),
-                "power"   => floatval($result->emeter->get_realtime->power),
-                "work"    => $work];
+                'voltage' => floatval($result->emeter->get_realtime->voltage),
+                'current' => floatval($result->emeter->get_realtime->current),
+                'power'   => floatval($result->emeter->get_realtime->power),
+                'work'    => $work];
         } else {
-            SetValueFloat($this->GetIDForIdent("Voltage"), floatval($result->emeter->get_realtime->voltage_mv) / 1000);
-            $this->SendDebug("TP Link:", "Voltage: " . floatval($result->emeter->get_realtime->voltage_mv) / 1000, 0);
-            SetValueFloat($this->GetIDForIdent("Current"), floatval($result->emeter->get_realtime->current_ma * 1000.0));
-            $this->SendDebug("TP Link:", "Current: " . floatval($result->emeter->get_realtime->current_ma * 1000.0), 0);
+            SetValueFloat($this->GetIDForIdent('Voltage'), floatval($result->emeter->get_realtime->voltage_mv) / 1000);
+            $this->SendDebug('TP Link:', 'Voltage: ' . floatval($result->emeter->get_realtime->voltage_mv) / 1000, 0);
+            SetValueFloat($this->GetIDForIdent('Current'), floatval($result->emeter->get_realtime->current_ma * 1000.0));
+            $this->SendDebug('TP Link:', 'Current: ' . floatval($result->emeter->get_realtime->current_ma * 1000.0), 0);
             $power = floatval($result->emeter->get_realtime->power_mw);
-            $this->SendDebug("TP Link:", "Power: " . $power, 0);
-            SetValueFloat($this->GetIDForIdent("Power"), $power);
-            $previous_work = GetValueFloat($this->GetIDForIdent("Work"));
-            $timefactor    = floatval($this->ReadPropertyInteger("systeminfointerval") / 3600.0);
+            $this->SendDebug('TP Link:', 'Power: ' . $power, 0);
+            SetValueFloat($this->GetIDForIdent('Power'), $power);
+            $previous_work = GetValueFloat($this->GetIDForIdent('Work'));
+            $timefactor    = floatval($this->ReadPropertyInteger('systeminfointerval') / 3600.0);
             $work          = $previous_work + ($power * $timefactor);
-            $this->SendDebug("TP Link:", "Work: " . $work, 0);
-            SetValueFloat($this->GetIDForIdent("Work"), $work);
+            $this->SendDebug('TP Link:', 'Work: ' . $work, 0);
+            SetValueFloat($this->GetIDForIdent('Work'), $work);
             return [
-                "voltage" => floatval($result->emeter->get_realtime->voltage_mv) / 1000,
-                "current" => floatval($result->emeter->get_realtime->current_ma),
-                "power"   => floatval($result->emeter->get_realtime->power_mw),
-                "work"    => $work];
+                'voltage' => floatval($result->emeter->get_realtime->voltage_mv) / 1000,
+                'current' => floatval($result->emeter->get_realtime->current_ma),
+                'power'   => floatval($result->emeter->get_realtime->power_mw),
+                'work'    => $work];
         }
     }
 
@@ -1027,7 +1020,7 @@ class TPLinkHS110 extends IPSModule
             /*Validation*/
             if (checkdnsrr($urlparts['host'], 'A') && in_array($urlparts['scheme'], ['http', 'https']) && ip2long($urlparts['host']) === false) {
                 $urlparts['host'] = preg_replace('/^www\./', '', $urlparts['host']);
-                $url              = $urlparts['scheme'] . '://' . $urlparts['host'] . "/";
+                $url              = $urlparts['scheme'] . '://' . $urlparts['host'] . '/';
 
                 if (filter_var($url, FILTER_VALIDATE_URL) !== false && @get_headers($url)) {
                     $validation = true;
@@ -1050,8 +1043,8 @@ class TPLinkHS110 extends IPSModule
     public function RequestAction($Ident, $Value)
     {
         switch ($Ident) {
-            case "State":
-                $varid = $this->GetIDForIdent("State");
+            case 'State':
+                $varid = $this->GetIDForIdent('State');
                 SetValue($varid, $Value);
                 if ($Value) {
                     $this->PowerOn();
@@ -1060,17 +1053,17 @@ class TPLinkHS110 extends IPSModule
                 }
                 break;
             default:
-                $this->SendDebug("Request Action:", "Invalid ident", 0);
+                $this->SendDebug('Request Action:', 'Invalid ident', 0);
         }
     }
 
     protected function GetLEDState()
     {
-        $state = $this->ReadPropertyBoolean("ledoff");
+        $state = $this->ReadPropertyBoolean('ledoff');
         if ($state) {
-            $led_state = "on";
+            $led_state = 'on';
         } else {
-            $led_state = "off";
+            $led_state = 'off';
         }
         return $led_state;
     }
@@ -1078,7 +1071,7 @@ class TPLinkHS110 extends IPSModule
     //Profile
 
     /**
-     * register profiles
+     * register profiles.
      *
      * @param $Name
      * @param $Icon
@@ -1111,7 +1104,7 @@ class TPLinkHS110 extends IPSModule
     }
 
     /**
-     * register profile association
+     * register profile association.
      *
      * @param $Name
      * @param $Icon
@@ -1126,19 +1119,19 @@ class TPLinkHS110 extends IPSModule
      */
     protected function RegisterProfileAssociation($Name, $Icon, $Prefix, $Suffix, $MinValue, $MaxValue, $Stepsize, $Digits, $Vartype, $Associations)
     {
-        if (is_array($Associations) && sizeof($Associations) === 0) {
+        if (is_array($Associations) && count($Associations) === 0) {
             $MinValue = 0;
             $MaxValue = 0;
         }
         $this->RegisterProfile($Name, $Icon, $Prefix, $Suffix, $MinValue, $MaxValue, $Stepsize, $Digits, $Vartype);
 
         if (is_array($Associations)) {
-            foreach ($Associations AS $Association) {
+            foreach ($Associations as $Association) {
                 IPS_SetVariableProfileAssociation($Name, $Association[0], $Association[1], $Association[2], $Association[3]);
             }
         } else {
             $Associations = $this->$Associations;
-            foreach ($Associations AS $code => $association) {
+            foreach ($Associations as $code => $association) {
                 IPS_SetVariableProfileAssociation($Name, $code, $this->Translate($association), $Icon, -1);
             }
         }
@@ -1146,11 +1139,11 @@ class TPLinkHS110 extends IPSModule
     }
 
     /**
-     * send debug log
+     * send debug log.
      *
      * @param string $notification
      * @param string $message
-     * @param int    $format 0 = Text, 1 = Hex
+     * @param int    $format       0 = Text, 1 = Hex
      */
     private function _debug(string $notification = null, string $message = null, $format = 0)
     {
@@ -1162,7 +1155,7 @@ class TPLinkHS110 extends IPSModule
      ***********************************************************/
 
     /**
-     * build configuration form
+     * build configuration form.
      *
      * @return string
      */
@@ -1178,14 +1171,14 @@ class TPLinkHS110 extends IPSModule
     }
 
     /**
-     * return form configurations on configuration step
+     * return form configurations on configuration step.
      *
      * @return array
      */
     protected function FormHead()
     {
-        $model           = $this->ReadPropertyInteger("modelselection");
-        $softwareversion = $this->ReadPropertyString("softwareversion");
+        $model           = $this->ReadPropertyInteger('modelselection');
+        $softwareversion = $this->ReadPropertyString('softwareversion');
         $form            = [
             [
                 'type'    => 'Label',
@@ -1220,128 +1213,128 @@ class TPLinkHS110 extends IPSModule
         if ($model == 2) {
             $form = array_merge_recursive(
                 $form, [
-                         [
-                             'type'    => 'Label',
-                             'caption' => 'TP Link HS device system info update interval'],
-                         [
-                             'name'    => 'systeminfointerval',
-                             'type'    => 'IntervalBox',
-                             'caption' => 'seconds']]
+                    [
+                        'type'    => 'Label',
+                        'caption' => 'TP Link HS device system info update interval'],
+                    [
+                        'name'    => 'systeminfointerval',
+                        'type'    => 'IntervalBox',
+                        'caption' => 'seconds']]
             );
         }
-        if ($softwareversion == "") {
+        if ($softwareversion == '') {
             $form = array_merge_recursive(
                 $form, [
-                         [
-                             'type'    => 'Label',
-                             'caption' => 'TP Link HS get system information'],
-                         [
-                             'type'    => 'Button',
-                             'caption' => 'Get system info',
-                             'onClick' => 'TPLHS_WriteSystemInfo($id);']]
+                    [
+                        'type'    => 'Label',
+                        'caption' => 'TP Link HS get system information'],
+                    [
+                        'type'    => 'Button',
+                        'caption' => 'Get system info',
+                        'onClick' => 'TPLHS_WriteSystemInfo($id);']]
             );
         } else {
             $form = array_merge_recursive(
                 $form, [
-                         [
-                             'type'    => 'Label',
-                             'caption' => 'Data is from the TP Link HS device for information, change settings in the kasa app'],
-                         [
-                             'type'     => 'List',
-                             'name'     => 'TPLinkInformation',
-                             'caption'  => 'TP Link HS device information',
-                             'rowCount' => 2,
-                             'add'      => false,
-                             'delete'   => false,
-                             'sort'     => [
-                                 'column'    => 'model',
-                                 'direction' => 'ascending'],
-                             'columns'  => [
-                                 [
-                                     'name'    => 'model',
-                                     'caption' => 'model',
-                                     'width'   => '100px',
-                                     'visible' => true],
-                                 [
-                                     'name'    => 'softwareversion',
-                                     'caption' => 'software version',
-                                     'width'   => '150px',],
-                                 [
-                                     'name'    => 'hardwareversion',
-                                     'caption' => 'hardware version',
-                                     'width'   => '150px',],
-                                 [
-                                     'name'    => 'type',
-                                     'caption' => 'type',
-                                     'width'   => 'auto',],
-                                 [
-                                     'name'    => 'mac',
-                                     'caption' => 'mac',
-                                     'width'   => '150px',],
-                                 [
-                                     'name'    => 'deviceid',
-                                     'caption' => 'device id',
-                                     'width'   => '200px',],
-                                 [
-                                     'name'    => 'hardwareid',
-                                     'caption' => 'hardware id',
-                                     'width'   => '200px',],
-                                 [
-                                     'name'    => 'firmwareid',
-                                     'caption' => 'firmware id',
-                                     'width'   => '200px',],
-                                 [
-                                     'name'    => 'oemid',
-                                     'caption' => 'oem id',
-                                     'width'   => '200px',],
-                                 [
-                                     'name'    => 'alias',
-                                     'caption' => 'alias',
-                                     'width'   => '150px',],
-                                 [
-                                     'name'    => 'devicename',
-                                     'caption' => 'device name',
-                                     'width'   => '190px',],
-                                 [
-                                     'name'    => 'rssi',
-                                     'caption' => 'rssi',
-                                     'width'   => '50px',],
-                                 [
-                                     'name'    => 'ledoff',
-                                     'caption' => 'led state',
-                                     'width'   => '95px',],
-                                 [
-                                     'name'    => 'latitude',
-                                     'caption' => 'latitude',
-                                     'width'   => '110px',],
-                                 [
-                                     'name'    => 'longitude',
-                                     'caption' => 'longitude',
-                                     'width'   => '110px',]],
-                             'values'   => [
-                                 [
-                                     'model'           => $this->ReadPropertyString("model"),
-                                     'softwareversion' => $this->ReadPropertyString("softwareversion"),
-                                     'hardwareversion' => $this->ReadPropertyFloat("hardwareversion"),
-                                     'type'            => $this->ReadPropertyString("type"),
-                                     'mac'             => $this->ReadPropertyString("mac"),
-                                     'deviceid'        => $this->ReadPropertyString("deviceid"),
-                                     'hardwareid'      => $this->ReadPropertyString("hardwareid"),
-                                     'firmwareid'      => $this->ReadPropertyString("firmwareid"),
-                                     'oemid'           => $this->ReadPropertyString("oemid"),
-                                     'alias'           => $this->ReadPropertyString("alias"),
-                                     'devicename'      => $this->ReadPropertyString("devicename"),
-                                     'rssi'            => $this->ReadPropertyInteger("rssi"),
-                                     'ledoff'          => $this->GetLEDState(),
-                                     'latitude'        => $this->ReadPropertyFloat("latitude"),
-                                     'longitude'       => $this->ReadPropertyFloat("longitude")]]]]
+                    [
+                        'type'    => 'Label',
+                        'caption' => 'Data is from the TP Link HS device for information, change settings in the kasa app'],
+                    [
+                        'type'     => 'List',
+                        'name'     => 'TPLinkInformation',
+                        'caption'  => 'TP Link HS device information',
+                        'rowCount' => 2,
+                        'add'      => false,
+                        'delete'   => false,
+                        'sort'     => [
+                            'column'    => 'model',
+                            'direction' => 'ascending'],
+                        'columns'  => [
+                            [
+                                'name'    => 'model',
+                                'caption' => 'model',
+                                'width'   => '100px',
+                                'visible' => true],
+                            [
+                                'name'    => 'softwareversion',
+                                'caption' => 'software version',
+                                'width'   => '150px', ],
+                            [
+                                'name'    => 'hardwareversion',
+                                'caption' => 'hardware version',
+                                'width'   => '150px', ],
+                            [
+                                'name'    => 'type',
+                                'caption' => 'type',
+                                'width'   => 'auto', ],
+                            [
+                                'name'    => 'mac',
+                                'caption' => 'mac',
+                                'width'   => '150px', ],
+                            [
+                                'name'    => 'deviceid',
+                                'caption' => 'device id',
+                                'width'   => '200px', ],
+                            [
+                                'name'    => 'hardwareid',
+                                'caption' => 'hardware id',
+                                'width'   => '200px', ],
+                            [
+                                'name'    => 'firmwareid',
+                                'caption' => 'firmware id',
+                                'width'   => '200px', ],
+                            [
+                                'name'    => 'oemid',
+                                'caption' => 'oem id',
+                                'width'   => '200px', ],
+                            [
+                                'name'    => 'alias',
+                                'caption' => 'alias',
+                                'width'   => '150px', ],
+                            [
+                                'name'    => 'devicename',
+                                'caption' => 'device name',
+                                'width'   => '190px', ],
+                            [
+                                'name'    => 'rssi',
+                                'caption' => 'rssi',
+                                'width'   => '50px', ],
+                            [
+                                'name'    => 'ledoff',
+                                'caption' => 'led state',
+                                'width'   => '95px', ],
+                            [
+                                'name'    => 'latitude',
+                                'caption' => 'latitude',
+                                'width'   => '110px', ],
+                            [
+                                'name'    => 'longitude',
+                                'caption' => 'longitude',
+                                'width'   => '110px', ]],
+                        'values'   => [
+                            [
+                                'model'           => $this->ReadPropertyString('model'),
+                                'softwareversion' => $this->ReadPropertyString('softwareversion'),
+                                'hardwareversion' => $this->ReadPropertyFloat('hardwareversion'),
+                                'type'            => $this->ReadPropertyString('type'),
+                                'mac'             => $this->ReadPropertyString('mac'),
+                                'deviceid'        => $this->ReadPropertyString('deviceid'),
+                                'hardwareid'      => $this->ReadPropertyString('hardwareid'),
+                                'firmwareid'      => $this->ReadPropertyString('firmwareid'),
+                                'oemid'           => $this->ReadPropertyString('oemid'),
+                                'alias'           => $this->ReadPropertyString('alias'),
+                                'devicename'      => $this->ReadPropertyString('devicename'),
+                                'rssi'            => $this->ReadPropertyInteger('rssi'),
+                                'ledoff'          => $this->GetLEDState(),
+                                'latitude'        => $this->ReadPropertyFloat('latitude'),
+                                'longitude'       => $this->ReadPropertyFloat('longitude')]]]]
             );
         }
         return $form;
     }
 
     /**
-     * return form actions by token
+     * return form actions by token.
      *
      * @return array
      */
@@ -1379,24 +1372,24 @@ class TPLinkHS110 extends IPSModule
                 'type'    => 'Button',
                 'caption' => 'Reset Work',
                 'onClick' => 'TPLHS_ResetWork($id);']];
-        $timeout = $this->ReadAttributeBoolean("Timeout");
+        $timeout = $this->ReadAttributeBoolean('Timeout');
         if ($timeout) {
             $form = array_merge_recursive(
                 $form, [
-                         [
-                             'type'    => 'Label',
-                             'caption' => 'Get System Info'],
-                         [
-                             'type'    => 'Button',
-                             'caption' => 'Get System Info',
-                             'onClick' => 'TPLHS_GetSystemInfo($id);']]
+                    [
+                        'type'    => 'Label',
+                        'caption' => 'Get System Info'],
+                    [
+                        'type'    => 'Button',
+                        'caption' => 'Get System Info',
+                        'onClick' => 'TPLHS_GetSystemInfo($id);']]
             );
         }
         return $form;
     }
 
     /**
-     * return from status
+     * return from status.
      *
      * @return array
      */
@@ -1431,5 +1424,3 @@ class TPLinkHS110 extends IPSModule
         return $form;
     }
 }
-
-?>
