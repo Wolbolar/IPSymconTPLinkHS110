@@ -267,7 +267,7 @@ class TPLinkHS110 extends IPSModule
     {
         //Now receive reply from server
         $buf = '';
-        if (socket_recv($sock, $buf, 2048, MSG_WAITALL) === false) {
+		if (socket_recv($sock, $buf, 2048, 0) === false) {
             $errorcode = socket_last_error();
             $errormsg  = socket_strerror($errorcode);
             $this->SendDebug('TP Link Socket:', 'Could not receive data: [' . $errorcode . '] ' . $errormsg, 0);
