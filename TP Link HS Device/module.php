@@ -773,7 +773,8 @@ class TPLinkHS110 extends IPSModule
             $this->SendDebug('TP Link:', 'Power: ' . $power, 0);
             SetValueFloat($this->GetIDForIdent('Power'), $power);
             $previous_work = GetValueFloat($this->GetIDForIdent('Work'));
-            $timefactor    = floatval($this->ReadPropertyInteger('systeminfointerval') / 3600.0);
+            // The HS110 reports power in watts; convert watt-seconds to kWh.
+            $timefactor    = floatval($this->ReadPropertyInteger('systeminfointerval') / 3600000.0);
             $work          = $previous_work + ($power * $timefactor);
             $this->SendDebug('TP Link:', 'Work: ' . $work, 0);
             SetValueFloat($this->GetIDForIdent('Work'), $work);
@@ -791,7 +792,8 @@ class TPLinkHS110 extends IPSModule
             $this->SendDebug('TP Link:', 'Power: ' . $power, 0);
             SetValueFloat($this->GetIDForIdent('Power'), $power);
             $previous_work = GetValueFloat($this->GetIDForIdent('Work'));
-            $timefactor    = floatval($this->ReadPropertyInteger('systeminfointerval') / 3600.0);
+            // This hardware revision reports power in milliwatts.
+            $timefactor    = floatval($this->ReadPropertyInteger('systeminfointerval') / 3600000000.0);
             $work          = $previous_work + ($power * $timefactor);
             $this->SendDebug('TP Link:', 'Work: ' . $work, 0);
             SetValueFloat($this->GetIDForIdent('Work'), $work);
